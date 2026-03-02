@@ -10,23 +10,14 @@ export async function POST(request: Request) {
         // Convert camelCase to snake_case for backend
         const backendBody = {
             tank_id: body.tankId,
+            batch_id: body.batchId,
             final_cabbage_salinity: body.finalCabbageSalinity,
-            washing_salinity: body.washingSalinity,
             bend_test: body.bendTest,
-            spiciness: body.spiciness,
-            output_quantity: body.outputQuantity,
-            quality_grade: body.qualityGrade,
-            notes: body.notes,
-            // Wash data (3 cycles)
-            wash1_top_salinity: body.wash1TopSalinity,
-            wash1_bottom_salinity: body.wash1BottomSalinity,
-            wash1_water_temp: body.wash1WaterTemp,
-            wash2_top_salinity: body.wash2TopSalinity,
-            wash2_bottom_salinity: body.wash2BottomSalinity,
-            wash2_water_temp: body.wash2WaterTemp,
-            wash3_top_salinity: body.wash3TopSalinity,
-            wash3_bottom_salinity: body.wash3BottomSalinity,
-            wash3_water_temp: body.wash3WaterTemp,
+            // Wash data - 1차, 3차 세척만 (단일 염도)
+            wash_tank1_salinity: body.wash1Salinity,
+            wash_tank1_water_temp: body.wash1WaterTemp,
+            wash_tank3_salinity: body.wash3Salinity,
+            wash_tank3_water_temp: body.wash3WaterTemp,
         };
 
         const res = await fetch(`${API_BASE}/api/batches/finish`, {
