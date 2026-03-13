@@ -1,0 +1,63 @@
+{
+  "name": "dongchon-touch-panel",
+  "version": "1.0.0",
+  "description": "동촌에프에스 절임 조건 입력기",
+  "main": "main.js",
+  "author": "Dongchon F&S",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.dongchon.touchpanel",
+    "productName": "동촌 절임 입력기",
+    "directories": {
+      "output": "../dist"
+    },
+    "files": [
+      "main.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../backend-dist",
+        "to": "backend",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../out",
+        "to": "frontend",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "../assets/icon.ico",
+        "to": "icon.ico"
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "../assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "../assets/icon.ico",
+      "uninstallerIcon": "../assets/icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "동촌 절임 입력기",
+      "runAfterFinish": true
+    }
+  }
+}

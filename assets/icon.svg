@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="tankGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90D9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2E5A8C;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="waterGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#4A90D9;stop-opacity:0.9" />
+    </linearGradient>
+    <linearGradient id="cabbageGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8BC34A;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#558B2F;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="#1a237e"/>
+  <circle cx="256" cy="256" r="220" fill="#283593"/>
+
+  <!-- Pickling Tank Body -->
+  <rect x="100" y="140" width="312" height="240" rx="20" ry="20" fill="url(#tankGradient)" stroke="#1a237e" stroke-width="8"/>
+
+  <!-- Tank Top Rim -->
+  <rect x="85" y="125" width="342" height="30" rx="10" ry="10" fill="#5C6BC0" stroke="#1a237e" stroke-width="4"/>
+
+  <!-- Water/Brine in Tank -->
+  <rect x="110" y="180" width="292" height="190" rx="10" ry="10" fill="url(#waterGradient)"/>
+
+  <!-- Water Waves -->
+  <path d="M110 200 Q150 185 190 200 T270 200 T350 200 T402 200" stroke="#fff" stroke-width="3" fill="none" opacity="0.5"/>
+  <path d="M110 220 Q150 205 190 220 T270 220 T350 220 T402 220" stroke="#fff" stroke-width="2" fill="none" opacity="0.3"/>
+
+  <!-- Cabbage 1 (Left) -->
+  <ellipse cx="180" cy="280" rx="45" ry="35" fill="url(#cabbageGradient)"/>
+  <path d="M180 250 Q160 265 165 285 Q175 270 180 280" stroke="#33691E" stroke-width="2" fill="none"/>
+  <path d="M180 250 Q200 265 195 285 Q185 270 180 280" stroke="#33691E" stroke-width="2" fill="none"/>
+  <ellipse cx="180" cy="270" rx="15" ry="12" fill="#9CCC65"/>
+
+  <!-- Cabbage 2 (Center) -->
+  <ellipse cx="256" cy="300" rx="50" ry="40" fill="url(#cabbageGradient)"/>
+  <path d="M256 265 Q230 285 238 310 Q250 290 256 300" stroke="#33691E" stroke-width="2" fill="none"/>
+  <path d="M256 265 Q282 285 274 310 Q262 290 256 300" stroke="#33691E" stroke-width="2" fill="none"/>
+  <ellipse cx="256" cy="288" rx="18" ry="14" fill="#9CCC65"/>
+
+  <!-- Cabbage 3 (Right) -->
+  <ellipse cx="332" cy="275" rx="42" ry="32" fill="url(#cabbageGradient)"/>
+  <path d="M332 248 Q315 260 318 278 Q328 265 332 273" stroke="#33691E" stroke-width="2" fill="none"/>
+  <path d="M332 248 Q349 260 346 278 Q336 265 332 273" stroke="#33691E" stroke-width="2" fill="none"/>
+  <ellipse cx="332" cy="265" rx="14" ry="10" fill="#9CCC65"/>
+
+  <!-- Salt Particles -->
+  <circle cx="140" cy="200" r="4" fill="#fff" opacity="0.7"/>
+  <circle cx="200" cy="210" r="3" fill="#fff" opacity="0.6"/>
+  <circle cx="280" cy="195" r="4" fill="#fff" opacity="0.7"/>
+  <circle cx="350" cy="205" r="3" fill="#fff" opacity="0.6"/>
+  <circle cx="380" cy="220" r="4" fill="#fff" opacity="0.5"/>
+  <circle cx="160" cy="230" r="3" fill="#fff" opacity="0.5"/>
+  <circle cx="310" cy="225" r="3" fill="#fff" opacity="0.6"/>
+
+  <!-- Digital Display Panel -->
+  <rect x="130" y="395" width="252" height="50" rx="8" ry="8" fill="#0D1B2A"/>
+  <rect x="135" y="400" width="242" height="40" rx="5" ry="5" fill="#1B263B"/>
+
+  <!-- Display Text - Salinity Reading -->
+  <text x="256" y="428" font-family="monospace" font-size="24" fill="#00FF88" text-anchor="middle" font-weight="bold">3.2% | 15.5°C</text>
+
+  <!-- Touch Panel Indicator Dots -->
+  <circle cx="150" cy="420" r="5" fill="#00FF88"/>
+  <circle cx="362" cy="420" r="5" fill="#FF6B6B"/>
+
+  <!-- Tank Legs -->
+  <rect x="120" y="380" width="20" height="45" rx="5" ry="5" fill="#37474F"/>
+  <rect x="372" y="380" width="20" height="45" rx="5" ry="5" fill="#37474F"/>
+</svg>
