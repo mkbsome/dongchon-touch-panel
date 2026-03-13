@@ -7,9 +7,7 @@ a = Analysis(
     ['app/main_exe.py'],
     pathex=[],
     binaries=[],
-    datas=[
-        ('dongchon.db', '.'),  # Include database if exists
-    ],
+    datas=[],
     hiddenimports=[
         'uvicorn.logging',
         'uvicorn.loops',
@@ -60,11 +58,10 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,  # Show console for debugging
+    console=True,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='../assets/icon.ico',
 )
