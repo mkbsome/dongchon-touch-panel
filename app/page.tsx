@@ -28,8 +28,13 @@ interface TankStatus {
 
 export default function Home() {
     const router = useRouter();
-    const [now, setNow] = useState(new Date());
+    const [now, setNow] = useState<Date | null>(null);
     const [tankStatuses, setTankStatuses] = useState<Record<number, TankStatus>>({});
+
+    // Hydration 에러 방지: 클라이언트에서만 시간 설정
+    useEffect(() => {
+        setNow(new Date());
+    }, []);
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -55,7 +60,7 @@ export default function Home() {
     }, []);
 
     const getElapsedTime = (startTimeStr?: string) => {
-        if (!startTimeStr) return '';
+        if (!startTimeStr || !now) return '';
         const startTime = new Date(startTimeStr);
         const diff = now.getTime() - startTime.getTime();
         const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -197,14 +202,14 @@ export default function Home() {
                         </button>
                         <div className="bg-white rounded-2xl px-6 py-3 shadow-lg border border-slate-100">
                             <div className="text-3xl font-black text-slate-800">
-                                {now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                                {now ? now.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                             </div>
                             <div className="text-sm text-slate-500 text-center">
-                                {now.toLocaleDateString('ko-KR', {
+                                {now ? now.toLocaleDateString('ko-KR', {
                                     month: 'long',
                                     day: 'numeric',
                                     weekday: 'short'
-                                })}
+                                }) : '-'}
                             </div>
                         </div>
                     </div>
