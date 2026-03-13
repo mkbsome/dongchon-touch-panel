@@ -15,7 +15,7 @@ if not exist "venv\Scripts\python.exe" (
     python -m venv venv
 )
 
-start "Backend" cmd /k "chcp 65001 > nul && call venv\Scripts\activate.bat && pip install -r requirements.txt -q && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+start "Backend" cmd /k "chcp 65001 > nul && call venv\Scripts\activate.bat && pip install -r requirements.txt -q && python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload"
 
 :: Wait for backend to start
 echo Waiting for backend to start...
@@ -35,8 +35,8 @@ echo ============================================
 echo   Servers Started!
 echo.
 echo   Frontend: http://localhost:3000
-echo   Backend:  http://localhost:8000
-echo   API Docs: http://localhost:8000/docs
+echo   Backend:  http://localhost:8001
+echo   API Docs: http://localhost:8001/docs
 echo ============================================
 echo.
 echo Press any key to close this window...

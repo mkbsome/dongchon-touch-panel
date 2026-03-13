@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE = process.env.BACKEND_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_URL || 'http://localhost:8001';
 
 // GET: CSV 내보내기 (머신러닝용)
 export async function GET(request: Request) {

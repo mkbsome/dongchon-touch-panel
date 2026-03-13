@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE = process.env.BACKEND_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_URL || 'http://localhost:8001';
 
 // GET: 완료된 배치 목록 조회 (최신순)
 export async function GET() {

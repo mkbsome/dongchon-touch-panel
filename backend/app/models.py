@@ -83,6 +83,14 @@ class Batch(Base):
     wash3_bottom_salinity = Column(Float, nullable=True)
     wash3_water_temp = Column(Float, nullable=True)
 
+    # Derived variables (calculated at batch finish - per design doc)
+    duration_hours = Column(Float, nullable=True)  # 절임 시간 (hours)
+    salinity_drop = Column(Float, nullable=True)  # 염도 감소량 (초기염도 - 최종염도)
+    salinity_drop_rate = Column(Float, nullable=True)  # 시간당 염도 감소율
+    vant_hoff_osmotic = Column(Float, nullable=True)  # Van't Hoff 삼투압 = initial_salinity * (water_temp + 273.15) / 100
+    weight_firmness = Column(Float, nullable=True)  # 무게-경도 상호작용 = avg_weight * firmness
+    wash_salinity_drop = Column(Float, nullable=True)  # 세척 효과 = wash1_salinity - wash3_salinity
+
     # Relationships
     tank = relationship("Tank", back_populates="batches")
     measurements = relationship("Measurement", back_populates="batch", cascade="all, delete-orphan")
@@ -114,10 +122,10 @@ class Measurement(Base):
 
     memo = Column(Text, nullable=True)  # Notes
 
-    # Derived variables (calculated automatically for ML)
+    # Derived variables (calculated automatically for ML - per design doc)
     salinity_avg = Column(Float, nullable=True)  # Average salinity (%)
     salinity_diff = Column(Float, nullable=True)  # Salinity difference |top - bottom|
-    osmotic_pressure_index = Column(Float, nullable=True)  # Osmotic pressure proxy
+    osmotic_index = Column(Float, nullable=True)  # 삼투압 지수 = salinity_avg * water_temp
     accumulated_temp = Column(Float, nullable=True)  # Accumulated temperature (C*hours)
 
     # Relationships

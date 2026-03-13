@@ -23,11 +23,19 @@ def calculate_derived_variables(
     previous_measurements: list[Measurement],
     batch_start_time: datetime
 ) -> dict:
-    """Calculate derived variables for ML training"""
+    """
+    Calculate derived variables for ML training (per design doc 4_피처엔지니어링.md)
+
+    설계서 기준 파생변수:
+    - salinity_avg: 평균 염도 = (상부 + 하부) / 2
+    - salinity_diff: 염도 차이 = |상부 - 하부|
+    - osmotic_index: 삼투압 지수 = salinity_avg * water_temp (설계서 4.2.2)
+    - accumulated_temp: 적산 온도 = Σ(평균온도 * 시간)
+    """
     result = {
         "salinity_avg": None,
         "salinity_diff": None,
-        "osmotic_pressure_index": None,
+        "osmotic_index": None,  # 설계서 명칭으로 변경 (osmotic_pressure_index → osmotic_index)
         "accumulated_temp": 0.0
     }
 
@@ -36,9 +44,9 @@ def calculate_derived_variables(
         result["salinity_avg"] = (salinity_top + salinity_bottom) / 2
         result["salinity_diff"] = abs(salinity_top - salinity_bottom)
 
-        # Osmotic pressure index (proxy) = avg salinity * water temp
+        # osmotic_index = salinity_avg * water_temp (설계서 4.2.2)
         if water_temp is not None:
-            result["osmotic_pressure_index"] = result["salinity_avg"] * water_temp
+            result["osmotic_index"] = result["salinity_avg"] * water_temp
 
     # Calculate accumulated temperature
     # Formula: sum of (avg_temp * hours) for each interval
@@ -120,10 +128,10 @@ def create_measurement(measurement_data: MeasurementCreate, db: Session = Depend
         added_salt=measurement_data.added_salt or False,
         added_salt_amount=measurement_data.added_salt_amount,
         memo=measurement_data.memo,
-        # Derived variables (calculated automatically)
+        # Derived variables (calculated automatically - per design doc)
         salinity_avg=derived["salinity_avg"],
         salinity_diff=derived["salinity_diff"],
-        osmotic_pressure_index=derived["osmotic_pressure_index"],
+        osmotic_index=derived["osmotic_index"],
         accumulated_temp=derived["accumulated_temp"]
     )
 

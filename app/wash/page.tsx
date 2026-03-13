@@ -22,7 +22,7 @@ interface WashRecord {
     batchId: number;
     washCycle: number;
     timestamp: string;
-    salinity?: number;      // 단일 염도
+    salinity?: number;
     waterTemp?: number;
     ph?: number;
 }
@@ -50,11 +50,16 @@ function WashContent() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
+    // 1차, 3차 따로 입력
     const [formData, setFormData] = useState({
-        washCycle: 1,
-        salinity: 3.0,      // 단일 염도
-        waterTemp: 15.0,
-        ph: 7.0,
+        // 1차 세척
+        wash1Salinity: 5.0,
+        wash1WaterTemp: 15.0,
+        wash1Ph: 7.0,
+        // 3차 세척
+        wash3Salinity: 2.5,
+        wash3WaterTemp: 15.0,
+        wash3Ph: 7.0,
     });
 
     useEffect(() => {
@@ -94,11 +99,6 @@ function WashContent() {
         };
 
         fetchWashRecords();
-
-        setFormData(prev => ({
-            ...prev,
-            washCycle: selectedBatch.nextCycle
-        }));
     }, [selectedBatch]);
 
     const handleSubmit = async () => {
@@ -110,31 +110,40 @@ function WashContent() {
         setSubmitting(true);
 
         try {
-            const res = await fetch('/api/wash', {
+            // 1차 세척 저장
+            await fetch('/api/wash', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     batchId: selectedBatch.batchId,
                     washTankId: Number(washTankId),
-                    washCycle: formData.washCycle,
-                    salinity: formData.salinity,
-                    waterTemp: formData.waterTemp,
-                    ph: formData.ph,
+                    washCycle: 1,
+                    salinity: formData.wash1Salinity,
+                    waterTemp: formData.wash1WaterTemp,
+                    ph: formData.wash1Ph,
                 })
             });
 
-            if (!res.ok) throw new Error('Failed to create wash record');
+            // 3차 세척 저장
+            await fetch('/api/wash', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    batchId: selectedBatch.batchId,
+                    washTankId: Number(washTankId),
+                    washCycle: 3,
+                    salinity: formData.wash3Salinity,
+                    waterTemp: formData.wash3WaterTemp,
+                    ph: formData.wash3Ph,
+                })
+            });
 
+            // 기록 새로고침
             const recordsRes = await fetch(`/api/wash?batchId=${selectedBatch.batchId}`);
             if (recordsRes.ok) {
                 const data = await recordsRes.json();
                 setWashRecords(data);
             }
-
-            setFormData(prev => ({
-                ...prev,
-                washCycle: prev.washCycle + 1,
-            }));
 
             const batchesRes = await fetch('/api/wash/active-batches');
             if (batchesRes.ok) {
@@ -145,6 +154,8 @@ function WashContent() {
                     setSelectedBatch(updatedBatch);
                 }
             }
+
+            alert('1차, 3차 세척 데이터가 저장되었습니다.');
         } catch (error) {
             console.error('Error creating wash record:', error);
             alert('세척 데이터 저장 중 오류가 발생했습니다.');
@@ -184,7 +195,7 @@ function WashContent() {
 
             {/* Main Content */}
             <main className="flex-1 p-5 overflow-hidden">
-                <div className="h-full grid grid-cols-2 gap-5">
+                <div className="h-full grid grid-cols-3 gap-5">
                     {/* Left - Batch Selection & History */}
                     <div className="flex flex-col gap-4 overflow-hidden">
                         {/* Batch Selection */}
@@ -198,7 +209,7 @@ function WashContent() {
                                     진행 중인 절임 공정이 없습니다.
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-1 gap-3">
                                     {activeBatches.map((batch) => (
                                         <button
                                             key={batch.batchId}
@@ -212,41 +223,19 @@ function WashContent() {
                                                         : "bg-slate-50 hover:bg-slate-100 border border-slate-200"
                                             )}
                                         >
-                                            <div className="flex justify-between items-start">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={clsx(
-                                                        "text-3xl font-black",
-                                                        selectedBatch?.batchId === batch.batchId ? "text-white" : "text-slate-700"
-                                                    )}>
-                                                        {batch.tankNumber}번
-                                                    </div>
-                                                    {batch.status === 'completed' && (
-                                                        <span className={clsx(
-                                                            "text-xs px-2 py-0.5 rounded-full font-bold",
-                                                            selectedBatch?.batchId === batch.batchId
-                                                                ? "bg-white/30 text-white"
-                                                                : "bg-emerald-500 text-white"
-                                                        )}>
-                                                            완료
-                                                        </span>
-                                                    )}
+                                            <div className="flex justify-between items-center">
+                                                <div className={clsx(
+                                                    "text-2xl font-black",
+                                                    selectedBatch?.batchId === batch.batchId ? "text-white" : "text-slate-700"
+                                                )}>
+                                                    {batch.tankNumber}번
                                                 </div>
-                                                {batch.washCount > 0 && (
-                                                    <span className={clsx(
-                                                        "text-sm px-2 py-1 rounded-lg font-bold",
-                                                        selectedBatch?.batchId === batch.batchId
-                                                            ? "bg-white/30 text-white"
-                                                            : "bg-cyan-100 text-cyan-700"
-                                                    )}>
-                                                        세척 {batch.washCount}회
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className={clsx(
-                                                "text-lg font-bold mt-1",
-                                                selectedBatch?.batchId === batch.batchId ? "text-cyan-100" : "text-slate-500"
-                                            )}>
-                                                {CULTIVAR_NAMES[batch.cultivar] || batch.cultivar}
+                                                <div className={clsx(
+                                                    "text-lg font-bold",
+                                                    selectedBatch?.batchId === batch.batchId ? "text-cyan-100" : "text-slate-500"
+                                                )}>
+                                                    {CULTIVAR_NAMES[batch.cultivar] || batch.cultivar}
+                                                </div>
                                             </div>
                                         </button>
                                     ))}
@@ -257,45 +246,40 @@ function WashContent() {
                         {/* Wash History */}
                         <section className="bg-white rounded-3xl shadow-lg p-5 flex-1 overflow-hidden flex flex-col">
                             <h2 className="text-xl font-bold text-slate-700 mb-4">
-                                세척 기록 {selectedBatch && `(${selectedBatch.tankNumber}번 절임조)`}
+                                세척 기록
                             </h2>
 
                             {!selectedBatch ? (
                                 <div className="flex-1 flex items-center justify-center text-slate-400">
-                                    절임조를 선택하면 세척 기록이 표시됩니다.
+                                    절임조를 선택하세요
                                 </div>
                             ) : washRecords.length === 0 ? (
                                 <div className="flex-1 flex items-center justify-center text-slate-400">
-                                    아직 세척 기록이 없습니다.
+                                    기록 없음
                                 </div>
                             ) : (
                                 <div className="overflow-y-auto flex-1 space-y-2">
                                     {washRecords.map((record) => (
                                         <div
                                             key={record.id}
-                                            className="p-3 bg-cyan-50 rounded-2xl flex items-center gap-4"
+                                            className={clsx(
+                                                "p-3 rounded-2xl flex items-center gap-3",
+                                                record.washCycle === 1 ? "bg-cyan-50" : "bg-teal-50"
+                                            )}
                                         >
-                                            <div className="w-14 h-14 bg-cyan-500 rounded-xl flex items-center justify-center">
-                                                <span className="text-2xl font-black text-white">
+                                            <div className={clsx(
+                                                "w-10 h-10 rounded-xl flex items-center justify-center",
+                                                record.washCycle === 1 ? "bg-cyan-500" : "bg-teal-500"
+                                            )}>
+                                                <span className="text-xl font-black text-white">
                                                     {record.washCycle}
                                                 </span>
                                             </div>
-                                            <div className="flex-1 grid grid-cols-3 gap-3 text-sm">
-                                                <div>
-                                                    <div className="text-slate-400">염도</div>
-                                                    <div className="font-bold text-slate-700">{record.salinity?.toFixed(1) || '-'}%</div>
+                                            <div className="flex-1 text-sm">
+                                                <div className="font-bold text-slate-700">
+                                                    {record.salinity?.toFixed(1)}% · {record.waterTemp?.toFixed(1)}°C · pH {record.ph?.toFixed(1)}
                                                 </div>
-                                                <div>
-                                                    <div className="text-slate-400">온도</div>
-                                                    <div className="font-bold text-slate-700">{record.waterTemp?.toFixed(1) || '-'}°C</div>
-                                                </div>
-                                                <div>
-                                                    <div className="text-slate-400">pH</div>
-                                                    <div className="font-bold text-slate-700">{record.ph?.toFixed(1) || '-'}</div>
-                                                </div>
-                                            </div>
-                                            <div className="text-slate-400 text-sm">
-                                                {formatTime(record.timestamp)}
+                                                <div className="text-slate-400">{formatTime(record.timestamp)}</div>
                                             </div>
                                         </div>
                                     ))}
@@ -304,108 +288,173 @@ function WashContent() {
                         </section>
                     </div>
 
-                    {/* Right - Input Form */}
+                    {/* Middle - 1차 세척 */}
                     <div className="flex flex-col gap-4">
-                        {/* Wash Cycle */}
-                        <section className="bg-white rounded-3xl shadow-lg p-5">
-                            <h2 className="text-xl font-bold text-slate-700 mb-4 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
-                                    <Waves className="w-6 h-6 text-cyan-500" />
-                                </div>
-                                세척 회차
+                        <section className="bg-gradient-to-b from-cyan-500 to-cyan-600 rounded-3xl shadow-lg p-5 flex-1">
+                            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                <span className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">1</span>
+                                1차 세척 (초벌)
                             </h2>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setFormData(prev => ({ ...prev, washCycle: Math.max(1, prev.washCycle - 1) }))}
-                                    className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
-                                >-</button>
-                                <div className="flex-1 min-w-0 h-16 flex items-center justify-center text-4xl font-black text-cyan-600 bg-cyan-50 rounded-2xl border-2 border-cyan-200">
-                                    {formData.washCycle}회
-                                </div>
-                                <button
-                                    onClick={() => setFormData(prev => ({ ...prev, washCycle: prev.washCycle + 1 }))}
-                                    className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
-                                >+</button>
-                            </div>
-                        </section>
 
-                        {/* Salinity Input - 단일 염도 */}
-                        <section className="bg-white rounded-3xl shadow-lg p-5">
-                            <h2 className="text-xl font-bold text-slate-700 mb-4 flex items-center gap-3">
-                                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                                    <Droplets className="w-6 h-6 text-blue-500" />
-                                </div>
-                                염도 (%)
-                            </h2>
-                            <div className="flex items-center gap-3">
-                                <button
-                                    onClick={() => setFormData(prev => ({ ...prev, salinity: Math.max(0, Number((prev.salinity - 0.1).toFixed(1))) }))}
-                                    className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
-                                >-</button>
-                                <input
-                                    type="number"
-                                    step="0.1"
-                                    value={formData.salinity}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, salinity: Number(e.target.value) }))}
-                                    className="flex-1 min-w-0 h-16 text-center text-4xl font-black text-blue-600 border-2 border-blue-200 rounded-2xl bg-blue-50"
-                                />
-                                <button
-                                    onClick={() => setFormData(prev => ({ ...prev, salinity: Number((prev.salinity + 0.1).toFixed(1)) }))}
-                                    className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
-                                >+</button>
-                            </div>
-                        </section>
-
-                        {/* Temperature & pH */}
-                        <section className="bg-white rounded-3xl shadow-lg p-5">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
-                                        <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                                            <Thermometer className="w-5 h-5 text-orange-500" />
-                                        </div>
-                                        온도 (°C)
-                                    </h2>
+                            <div className="space-y-5">
+                                {/* 염도 */}
+                                <div className="bg-white/15 backdrop-blur rounded-2xl p-4">
+                                    <label className="flex items-center gap-2 text-cyan-100 font-bold mb-3">
+                                        <Droplets className="w-5 h-5" />
+                                        염도 (%)
+                                    </label>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, waterTemp: Math.max(0, Number((prev.waterTemp - 0.1).toFixed(1))) }))}
-                                            className="w-12 h-14 flex-shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-2xl font-bold text-slate-600"
+                                            onClick={() => setFormData(prev => ({ ...prev, wash1Salinity: Math.max(0, Number((prev.wash1Salinity - 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
                                         >-</button>
                                         <input
                                             type="number"
                                             step="0.1"
-                                            value={formData.waterTemp}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, waterTemp: Number(e.target.value) }))}
-                                            className="flex-1 min-w-0 h-14 text-center text-2xl font-black text-orange-600 border-2 border-orange-200 rounded-xl bg-orange-50"
+                                            value={formData.wash1Salinity}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, wash1Salinity: Number(e.target.value) }))}
+                                            className="flex-1 h-12 text-center text-2xl font-black text-cyan-600 rounded-xl"
                                         />
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, waterTemp: Number((prev.waterTemp + 0.1).toFixed(1)) }))}
-                                            className="w-12 h-14 flex-shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-2xl font-bold text-slate-600"
+                                            onClick={() => setFormData(prev => ({ ...prev, wash1Salinity: Number((prev.wash1Salinity + 0.1).toFixed(1)) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
                                         >+</button>
                                     </div>
                                 </div>
-                                <div>
-                                    <h2 className="text-lg font-bold text-slate-700 mb-3 flex items-center gap-2">
-                                        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                                            <FlaskConical className="w-5 h-5 text-purple-500" />
-                                        </div>
-                                        pH
-                                    </h2>
+
+                                {/* 온도 */}
+                                <div className="bg-white/15 backdrop-blur rounded-2xl p-4">
+                                    <label className="flex items-center gap-2 text-cyan-100 font-bold mb-3">
+                                        <Thermometer className="w-5 h-5" />
+                                        온도 (°C)
+                                    </label>
                                     <div className="flex items-center gap-2">
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, ph: Math.max(0, +(prev.ph - 0.1).toFixed(1)) }))}
-                                            className="w-12 h-14 flex-shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-2xl font-bold text-slate-600"
+                                            onClick={() => setFormData(prev => ({ ...prev, wash1WaterTemp: Math.max(0, Number((prev.wash1WaterTemp - 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
                                         >-</button>
                                         <input
                                             type="number"
                                             step="0.1"
-                                            value={formData.ph}
-                                            onChange={(e) => setFormData(prev => ({ ...prev, ph: Number(e.target.value) }))}
-                                            className="flex-1 min-w-0 h-14 text-center text-2xl font-black text-purple-600 border-2 border-purple-200 rounded-xl bg-purple-50"
+                                            value={formData.wash1WaterTemp}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, wash1WaterTemp: Number(e.target.value) }))}
+                                            className="flex-1 h-12 text-center text-2xl font-black text-orange-600 rounded-xl"
                                         />
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, ph: Math.min(14, +(prev.ph + 0.1).toFixed(1)) }))}
-                                            className="w-12 h-14 flex-shrink-0 rounded-xl bg-slate-100 hover:bg-slate-200 text-2xl font-bold text-slate-600"
+                                            onClick={() => setFormData(prev => ({ ...prev, wash1WaterTemp: Number((prev.wash1WaterTemp + 0.1).toFixed(1)) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >+</button>
+                                    </div>
+                                </div>
+
+                                {/* pH */}
+                                <div className="bg-white/15 backdrop-blur rounded-2xl p-4">
+                                    <label className="flex items-center gap-2 text-cyan-100 font-bold mb-3">
+                                        <FlaskConical className="w-5 h-5" />
+                                        pH
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash1Ph: Math.max(0, Number((prev.wash1Ph - 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >-</button>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.wash1Ph}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, wash1Ph: Number(e.target.value) }))}
+                                            className="flex-1 h-12 text-center text-2xl font-black text-purple-600 rounded-xl"
+                                        />
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash1Ph: Math.min(14, Number((prev.wash1Ph + 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
+
+                    {/* Right - 3차 세척 */}
+                    <div className="flex flex-col gap-4">
+                        <section className="bg-gradient-to-b from-teal-500 to-teal-600 rounded-3xl shadow-lg p-5 flex-1">
+                            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+                                <span className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-xl">3</span>
+                                3차 세척 (마무리)
+                            </h2>
+
+                            <div className="space-y-5">
+                                {/* 염도 */}
+                                <div className="bg-white/15 backdrop-blur rounded-2xl p-4">
+                                    <label className="flex items-center gap-2 text-teal-100 font-bold mb-3">
+                                        <Droplets className="w-5 h-5" />
+                                        염도 (%)
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash3Salinity: Math.max(0, Number((prev.wash3Salinity - 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >-</button>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.wash3Salinity}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, wash3Salinity: Number(e.target.value) }))}
+                                            className="flex-1 h-12 text-center text-2xl font-black text-teal-600 rounded-xl"
+                                        />
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash3Salinity: Number((prev.wash3Salinity + 0.1).toFixed(1)) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >+</button>
+                                    </div>
+                                </div>
+
+                                {/* 온도 */}
+                                <div className="bg-white/15 backdrop-blur rounded-2xl p-4">
+                                    <label className="flex items-center gap-2 text-teal-100 font-bold mb-3">
+                                        <Thermometer className="w-5 h-5" />
+                                        온도 (°C)
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash3WaterTemp: Math.max(0, Number((prev.wash3WaterTemp - 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >-</button>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.wash3WaterTemp}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, wash3WaterTemp: Number(e.target.value) }))}
+                                            className="flex-1 h-12 text-center text-2xl font-black text-orange-600 rounded-xl"
+                                        />
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash3WaterTemp: Number((prev.wash3WaterTemp + 0.1).toFixed(1)) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >+</button>
+                                    </div>
+                                </div>
+
+                                {/* pH */}
+                                <div className="bg-white/15 backdrop-blur rounded-2xl p-4">
+                                    <label className="flex items-center gap-2 text-teal-100 font-bold mb-3">
+                                        <FlaskConical className="w-5 h-5" />
+                                        pH
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash3Ph: Math.max(0, Number((prev.wash3Ph - 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
+                                        >-</button>
+                                        <input
+                                            type="number"
+                                            step="0.1"
+                                            value={formData.wash3Ph}
+                                            onChange={(e) => setFormData(prev => ({ ...prev, wash3Ph: Number(e.target.value) }))}
+                                            className="flex-1 h-12 text-center text-2xl font-black text-purple-600 rounded-xl"
+                                        />
+                                        <button
+                                            onClick={() => setFormData(prev => ({ ...prev, wash3Ph: Math.min(14, Number((prev.wash3Ph + 0.1).toFixed(1))) }))}
+                                            className="w-12 h-12 rounded-xl bg-white/20 hover:bg-white/30 text-white text-2xl font-bold"
                                         >+</button>
                                     </div>
                                 </div>
@@ -417,14 +466,14 @@ function WashContent() {
                             onClick={handleSubmit}
                             disabled={submitting || !selectedBatch}
                             className={clsx(
-                                "w-full py-6 rounded-2xl font-bold text-2xl shadow-xl transition-all flex items-center justify-center gap-3 mt-auto",
+                                "w-full py-6 rounded-2xl font-bold text-2xl shadow-xl transition-all flex items-center justify-center gap-3",
                                 submitting || !selectedBatch
                                     ? "bg-slate-400 text-white cursor-not-allowed"
-                                    : "bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 text-white active:scale-[0.98]"
+                                    : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white active:scale-[0.98]"
                             )}
                         >
                             <Check className="w-7 h-7" />
-                            {submitting ? '저장 중...' : `${formData.washCycle}회차 세척 저장`}
+                            {submitting ? '저장 중...' : '1차 + 3차 세척 저장'}
                         </button>
                     </div>
                 </div>

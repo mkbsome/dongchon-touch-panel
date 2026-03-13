@@ -1,23 +1,22 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE = process.env.BACKEND_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_URL || 'http://localhost:8001';
 
 // POST: 배치 종료 (결과 데이터 + 세척 데이터 포함)
 export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        // Convert camelCase to snake_case for backend
+        // 프론트엔드에서 이미 snake_case로 전송하므로 그대로 사용
         const backendBody = {
-            tank_id: body.tankId,
-            batch_id: body.batchId,
-            final_cabbage_salinity: body.finalCabbageSalinity,
-            bend_test: body.bendTest,
-            // Wash data - 1차, 3차 세척만 (단일 염도)
-            wash_tank1_salinity: body.wash1Salinity,
-            wash_tank1_water_temp: body.wash1WaterTemp,
-            wash_tank3_salinity: body.wash3Salinity,
-            wash_tank3_water_temp: body.wash3WaterTemp,
+            tank_id: body.tank_id,
+            final_cabbage_salinity: body.final_cabbage_salinity,
+            bend_test: body.bend_test,
+            // Wash data - 1차, 3차 세척
+            wash1_top_salinity: body.wash1_top_salinity,
+            wash1_water_temp: body.wash1_water_temp,
+            wash3_top_salinity: body.wash3_top_salinity,
+            wash3_water_temp: body.wash3_water_temp,
         };
 
         const res = await fetch(`${API_BASE}/api/batches/finish`, {

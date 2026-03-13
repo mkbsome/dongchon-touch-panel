@@ -101,6 +101,13 @@ class BatchResponse(BaseModel):
     wash3_top_salinity: Optional[float] = None
     wash3_bottom_salinity: Optional[float] = None
     wash3_water_temp: Optional[float] = None
+    # Derived variables (calculated at batch finish - per design doc)
+    duration_hours: Optional[float] = None
+    salinity_drop: Optional[float] = None
+    salinity_drop_rate: Optional[float] = None
+    vant_hoff_osmotic: Optional[float] = None
+    weight_firmness: Optional[float] = None
+    wash_salinity_drop: Optional[float] = None
 
     class Config:
         from_attributes = True
@@ -141,10 +148,10 @@ class MeasurementResponse(BaseModel):
     added_salt: bool
     added_salt_amount: Optional[float] = None
     memo: Optional[str] = None
-    # Derived variables (calculated automatically)
+    # Derived variables (calculated automatically - per design doc)
     salinity_avg: Optional[float] = None
     salinity_diff: Optional[float] = None
-    osmotic_pressure_index: Optional[float] = None
+    osmotic_index: Optional[float] = None  # 설계서 명칭
     accumulated_temp: Optional[float] = None
 
     class Config:

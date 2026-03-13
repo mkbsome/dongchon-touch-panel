@@ -113,9 +113,66 @@ def get_completed_batches(db: Session = Depends(get_db)):
     return batches
 
 
+def calculate_batch_derived_variables(batch: Batch, end_time: datetime) -> dict:
+    """
+    Calculate derived variables at batch finish (per design doc 4_피처엔지니어링.md)
+
+    설계서 기준 파생변수:
+    - duration_hours: 절임 시간 (hours)
+    - salinity_drop: 염도 감소량 = 초기염도 - 최종염도
+    - salinity_drop_rate: 시간당 염도 감소율 = salinity_drop / duration_hours
+    - vant_hoff_osmotic: Van't Hoff 삼투압 = initial_salinity * (water_temp + 273.15) / 100 (설계서 4.2.1)
+    - weight_firmness: 무게-경도 상호작용 = avg_weight * firmness (설계서 4.2.3)
+    - wash_salinity_drop: 세척 효과 = wash1_salinity - wash3_salinity
+    """
+    result = {
+        "duration_hours": None,
+        "salinity_drop": None,
+        "salinity_drop_rate": None,
+        "vant_hoff_osmotic": None,
+        "weight_firmness": None,
+        "wash_salinity_drop": None,
+    }
+
+    # duration_hours: 절임 시간 (시간 단위)
+    if batch.start_time:
+        duration_seconds = (end_time - batch.start_time).total_seconds()
+        result["duration_hours"] = round(duration_seconds / 3600, 2)
+
+    # salinity_drop: 염도 감소량
+    if batch.initial_salinity is not None and batch.final_cabbage_salinity is not None:
+        result["salinity_drop"] = round(batch.initial_salinity - batch.final_cabbage_salinity, 2)
+
+        # salinity_drop_rate: 시간당 염도 감소율
+        if result["duration_hours"] and result["duration_hours"] > 0:
+            result["salinity_drop_rate"] = round(result["salinity_drop"] / result["duration_hours"], 4)
+
+    # vant_hoff_osmotic: Van't Hoff 삼투압 (설계서 4.2.1)
+    # π = initial_salinity * (water_temp + 273.15) / 100
+    water_temp = batch.initial_water_temp or 15.0  # 기본값 15도
+    if batch.initial_salinity is not None:
+        result["vant_hoff_osmotic"] = round(batch.initial_salinity * (water_temp + 273.15) / 100, 4)
+
+    # weight_firmness: 무게-경도 상호작용 (설계서 4.2.3)
+    if batch.avg_weight is not None and batch.firmness is not None:
+        result["weight_firmness"] = round(batch.avg_weight * batch.firmness, 4)
+
+    # wash_salinity_drop: 세척 효과
+    wash1_avg = None
+    wash3_avg = None
+    if batch.wash1_top_salinity is not None:
+        wash1_avg = batch.wash1_top_salinity
+    if batch.wash3_top_salinity is not None:
+        wash3_avg = batch.wash3_top_salinity
+    if wash1_avg is not None and wash3_avg is not None:
+        result["wash_salinity_drop"] = round(wash1_avg - wash3_avg, 2)
+
+    return result
+
+
 @router.post("/finish", response_model=BatchResponse)
 def finish_batch(finish_data: BatchFinish, db: Session = Depends(get_db)):
-    """Finish an active batch with result data"""
+    """Finish an active batch with result data and calculate derived variables"""
     batch = db.query(Batch).filter(
         Batch.tank_id == finish_data.tank_id,
         Batch.status == BatchStatus.ACTIVE.value
@@ -125,8 +182,9 @@ def finish_batch(finish_data: BatchFinish, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="No active batch found for this tank")
 
     # Update batch with finish data
+    end_time = get_kst_now()
     batch.status = BatchStatus.COMPLETED.value
-    batch.end_time = get_kst_now()
+    batch.end_time = end_time
     batch.final_cabbage_salinity = finish_data.final_cabbage_salinity
     batch.washing_salinity = finish_data.washing_salinity
     batch.bend_test = finish_data.bend_test
@@ -145,6 +203,15 @@ def finish_batch(finish_data: BatchFinish, db: Session = Depends(get_db)):
     batch.wash3_top_salinity = finish_data.wash3_top_salinity
     batch.wash3_bottom_salinity = finish_data.wash3_bottom_salinity
     batch.wash3_water_temp = finish_data.wash3_water_temp
+
+    # Calculate derived variables (per design doc 4_피처엔지니어링.md)
+    derived = calculate_batch_derived_variables(batch, end_time)
+    batch.duration_hours = derived["duration_hours"]
+    batch.salinity_drop = derived["salinity_drop"]
+    batch.salinity_drop_rate = derived["salinity_drop_rate"]
+    batch.vant_hoff_osmotic = derived["vant_hoff_osmotic"]
+    batch.weight_firmness = derived["weight_firmness"]
+    batch.wash_salinity_drop = derived["wash_salinity_drop"]
 
     db.commit()
     db.refresh(batch)

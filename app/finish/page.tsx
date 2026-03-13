@@ -160,15 +160,15 @@ function FinishContent() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tankId: Number(tankId),
-                    batchId: batchInfo.batchId,
-                    finalCabbageSalinity: formData.finalSalinity,
-                    bendTest: formData.qualityBending,
-                    // 세척 데이터
-                    wash1Salinity: formData.wash1Salinity,
-                    wash1WaterTemp: formData.wash1WaterTemp,
-                    wash3Salinity: formData.wash3Salinity,
-                    wash3WaterTemp: formData.wash3WaterTemp,
+                    tank_id: Number(tankId),
+                    batch_id: batchInfo.batchId,
+                    final_cabbage_salinity: formData.finalSalinity,
+                    bend_test: formData.qualityBending,
+                    // 세척 데이터 (1차, 3차만)
+                    wash1_top_salinity: formData.wash1Salinity,
+                    wash1_water_temp: formData.wash1WaterTemp,
+                    wash3_top_salinity: formData.wash3Salinity,
+                    wash3_water_temp: formData.wash3WaterTemp,
                 })
             });
 

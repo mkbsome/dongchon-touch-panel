@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Clock, Sprout, PlayCircle, StopCircle, FileText, History, Waves } from 'lucide-react';
+import { Clock, Sprout, PlayCircle, StopCircle, FileText, History } from 'lucide-react';
 import { clsx } from 'clsx';
 
 const CULTIVAR_NAMES: Record<string, string> = {
@@ -26,19 +26,10 @@ interface TankStatus {
     cabbageSize?: string;
 }
 
-interface WashTankStatus {
-    id: number;
-    tank_number: number;
-    name: string;
-    current_batch_id?: number;
-    last_wash_time?: string;
-}
-
 export default function Home() {
     const router = useRouter();
     const [now, setNow] = useState(new Date());
     const [tankStatuses, setTankStatuses] = useState<Record<number, TankStatus>>({});
-    const [washTankStatuses, setWashTankStatuses] = useState<Record<number, WashTankStatus>>({});
 
     useEffect(() => {
         const fetchStatus = async () => {
@@ -47,12 +38,6 @@ export default function Home() {
                 if (res.ok) {
                     const data = await res.json();
                     setTankStatuses(data);
-                }
-
-                const washRes = await fetch('/api/wash/tanks');
-                if (washRes.ok) {
-                    const washData = await washRes.json();
-                    setWashTankStatuses(washData);
                 }
             } catch (error) {
                 console.error('Failed to fetch tank status:', error);
@@ -88,10 +73,6 @@ export default function Home() {
 
     const handleRecord = (tankId: number) => {
         router.push(`/record?tankId=${tankId}`);
-    };
-
-    const handleWashRecord = () => {
-        router.push('/wash');
     };
 
     const TOP_TANKS = [1, 2, 3];
@@ -193,44 +174,6 @@ export default function Home() {
         );
     };
 
-    const renderWashTank = () => {
-        const washStatus = washTankStatuses[1];
-
-        return (
-            <div className="rounded-3xl bg-gradient-to-b from-cyan-500 to-cyan-600 shadow-xl shadow-cyan-300/50 overflow-hidden flex flex-col h-full">
-                {/* Wash Tank Header */}
-                <div className="bg-cyan-600/50 px-4 py-3 text-center flex-shrink-0">
-                    <div className="text-cyan-100 text-base font-semibold tracking-wide">세척조</div>
-                    <div className="mt-1">
-                        <Waves className="w-14 h-14 mx-auto text-white" />
-                    </div>
-                </div>
-
-                {/* Wash Tank Content */}
-                <div className="p-4 flex-1 flex flex-col">
-                    <div className="flex-1 flex flex-col items-center justify-center">
-                        <div className="bg-white/15 backdrop-blur rounded-2xl p-4 w-full text-center mb-4">
-                            <div className="text-cyan-100 text-sm mb-1">마지막 세척</div>
-                            <div className="text-white font-bold text-xl">
-                                {washStatus?.last_wash_time
-                                    ? new Date(washStatus.last_wash_time).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
-                                    : '-'
-                                }
-                            </div>
-                        </div>
-                        <button
-                            onClick={handleWashRecord}
-                            className="w-full py-5 bg-white hover:bg-cyan-50 text-cyan-600 rounded-2xl font-bold text-xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                        >
-                            <Waves className="w-7 h-7" />
-                            세척 기록
-                        </button>
-                    </div>
-                </div>
-            </div>
-        );
-    };
-
     return (
         <div className="h-screen bg-gradient-to-br from-slate-100 to-slate-200 flex flex-col overflow-hidden">
             {/* Header */}
@@ -270,10 +213,9 @@ export default function Home() {
 
             {/* Main Content */}
             <main className="flex-1 p-5 overflow-hidden flex flex-col gap-5">
-                {/* Top Row: 절임조 1, 2, 3 + 세척조 */}
-                <div className="flex-1 grid grid-cols-4 gap-5">
+                {/* Top Row: 절임조 1, 2, 3 */}
+                <div className="flex-1 grid grid-cols-3 gap-5">
                     {TOP_TANKS.map(renderPicklingTank)}
-                    {renderWashTank()}
                 </div>
 
                 {/* Bottom Row: 절임조 4, 5, 6, 7 */}

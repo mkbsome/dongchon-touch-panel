@@ -110,12 +110,12 @@ function RecordContent() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    tankId: Number(tankId),
-                    salinityTop: formData.salinityTop,
-                    salinityBottom: formData.salinityBottom,
-                    waterTemp: formData.waterTemp,
-                    addedSalt: formData.addedSalt,
-                    addedSaltAmount: formData.addedSalt ? formData.addedSaltAmount : undefined,
+                    tank_id: Number(tankId),
+                    salinity_top: formData.salinityTop,
+                    salinity_bottom: formData.salinityBottom,
+                    water_temp: formData.waterTemp,
+                    added_salt: formData.addedSalt,
+                    added_salt_amount: formData.addedSalt ? formData.addedSaltAmount : undefined,
                 })
             });
 

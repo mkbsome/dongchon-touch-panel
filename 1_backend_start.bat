@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 > nul
-title Backend Server (8000)
+title Backend Server (8001)
 
 cd /d "%~dp0backend"
 
@@ -17,9 +17,9 @@ pip install -r requirements.txt -q
 
 echo.
 echo === Backend Server Starting ===
-echo http://localhost:8000
-echo http://localhost:8000/docs (API Documentation)
+echo http://localhost:8001
+echo http://localhost:8001/docs (API Documentation)
 echo.
 
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
 pause

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE = process.env.BACKEND_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_URL || 'http://localhost:8001';
 
 // POST: 세척 기록 생성
 export async function POST(request: Request) {

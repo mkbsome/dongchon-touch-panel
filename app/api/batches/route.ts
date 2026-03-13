@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_BASE = process.env.BACKEND_URL || 'http://localhost:8000';
+const API_BASE = process.env.BACKEND_URL || 'http://localhost:8001';
 
 // GET: 활성 배치 조회 (탱크별 상태)
 export async function GET() {
