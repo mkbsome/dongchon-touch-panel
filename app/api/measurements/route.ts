@@ -56,7 +56,7 @@ export async function POST(request: Request) {
 
         // Convert camelCase to snake_case for backend
         const backendBody = {
-            tank_id: body.tankId,
+            tank_id: body.tank_id ?? body.tankId,
             salinity_top: body.salinityTop ?? body.topSalinity,
             salinity_bottom: body.salinityBottom ?? body.bottomSalinity,
             water_temp: body.waterTemp ?? body.temperature,
