@@ -13,6 +13,7 @@ def get_kst_now():
 from app.database import get_db
 from app.models import Batch, BatchStatus
 from app.schemas import BatchCreate, BatchFinish, BatchResponse, TankStatus
+from app.rds_sync import sync_batch_to_rds, batch_to_dict
 
 router = APIRouter(prefix="/api/batches", tags=["batches"])
 
@@ -99,6 +100,9 @@ def create_batch(batch_data: BatchCreate, db: Session = Depends(get_db)):
     db.add(new_batch)
     db.commit()
     db.refresh(new_batch)
+
+    # RDS 동기화
+    sync_batch_to_rds(batch_to_dict(new_batch))
 
     return new_batch
 
@@ -215,5 +219,8 @@ def finish_batch(finish_data: BatchFinish, db: Session = Depends(get_db)):
 
     db.commit()
     db.refresh(batch)
+
+    # RDS 동기화
+    sync_batch_to_rds(batch_to_dict(batch))
 
     return batch

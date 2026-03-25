@@ -13,6 +13,7 @@ def get_kst_now():
 from app.database import get_db
 from app.models import Tank, TankType, Batch, BatchStatus, WashRecord
 from app.schemas import WashRecordCreate, WashRecordResponse, WashTankStatus
+from app.rds_sync import sync_wash_record_to_rds, wash_record_to_dict
 
 router = APIRouter(prefix="/api/wash", tags=["wash"])
 
@@ -96,6 +97,9 @@ def create_wash_record(wash_data: WashRecordCreate, db: Session = Depends(get_db
     db.add(wash_record)
     db.commit()
     db.refresh(wash_record)
+
+    # RDS 동기화
+    sync_wash_record_to_rds(wash_record_to_dict(wash_record))
 
     return wash_record
 

@@ -54,15 +54,15 @@ export async function POST(request: Request) {
     try {
         const body = await request.json();
 
-        // Convert camelCase to snake_case for backend
+        // Convert camelCase to snake_case for backend (support both formats)
         const backendBody = {
             tank_id: body.tank_id ?? body.tankId,
-            salinity_top: body.salinityTop ?? body.topSalinity,
-            salinity_bottom: body.salinityBottom ?? body.bottomSalinity,
-            water_temp: body.waterTemp ?? body.temperature,
+            salinity_top: body.salinity_top ?? body.salinityTop ?? body.topSalinity,
+            salinity_bottom: body.salinity_bottom ?? body.salinityBottom ?? body.bottomSalinity,
+            water_temp: body.water_temp ?? body.waterTemp ?? body.temperature,
             ph: body.ph,
-            added_salt: body.addedSalt,
-            added_salt_amount: body.addedSaltAmount,
+            added_salt: body.added_salt ?? body.addedSalt,
+            added_salt_amount: body.added_salt_amount ?? body.addedSaltAmount,
             memo: body.memo,
         };
 

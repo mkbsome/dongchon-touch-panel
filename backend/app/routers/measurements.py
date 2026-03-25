@@ -12,6 +12,7 @@ def get_kst_now():
 from app.database import get_db
 from app.models import Batch, Measurement, BatchStatus
 from app.schemas import MeasurementCreate, MeasurementResponse
+from app.rds_sync import sync_measurement_to_rds, measurement_to_dict
 
 router = APIRouter(prefix="/api/measurements", tags=["measurements"])
 
@@ -138,5 +139,8 @@ def create_measurement(measurement_data: MeasurementCreate, db: Session = Depend
     db.add(new_measurement)
     db.commit()
     db.refresh(new_measurement)
+
+    # RDS 동기화
+    sync_measurement_to_rds(measurement_to_dict(new_measurement))
 
     return new_measurement
