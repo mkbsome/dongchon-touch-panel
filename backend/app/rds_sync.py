@@ -42,7 +42,7 @@ def sync_batch_to_rds(batch_data: Dict[str, Any]) -> Optional[int]:
 
         # UPSERT: 로컬 ID 기준으로 처리
         cur.execute("""
-            INSERT INTO pickling_batches (
+            INSERT INTO core.pickling_batches (
                 id, tank_id, status, start_time, end_time,
                 cultivar, avg_weight, firmness, leaf_thickness, cabbage_size, total_quantity,
                 room_temp, outdoor_temp, season, initial_salinity, initial_water_temp,
@@ -117,7 +117,7 @@ def sync_measurement_to_rds(measurement_data: Dict[str, Any]) -> Optional[int]:
         cur = conn.cursor()
 
         cur.execute("""
-            INSERT INTO pickling_measurements (
+            INSERT INTO core.pickling_measurements (
                 id, batch_id, timestamp, elapsed_minutes,
                 salinity_top, salinity_bottom, water_temp, ph,
                 added_salt, added_salt_amount, memo,
@@ -171,7 +171,7 @@ def sync_wash_record_to_rds(wash_data: Dict[str, Any]) -> Optional[int]:
         cur = conn.cursor()
 
         cur.execute("""
-            INSERT INTO pickling_wash_records (
+            INSERT INTO core.pickling_wash_records (
                 id, batch_id, tank_id, wash_cycle, timestamp,
                 salinity_top, salinity_bottom, water_temp, ph,
                 salinity_avg, salinity_diff, memo,

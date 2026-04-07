@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # Remote Database (RDS PostgreSQL)
     rds_host: str = "triflow-db.cn88cwwm6cgt.ap-northeast-2.rds.amazonaws.com"
     rds_port: int = 5432
-    rds_database: str = "postgres"
+    rds_database: str = "triflow_ai"
     rds_user: str = "triflow_admin"
     rds_password: str = "tri878993+"
     rds_enabled: bool = True  # RDS 동기화 활성화 여부
