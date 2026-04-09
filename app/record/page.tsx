@@ -183,7 +183,7 @@ function RecordContent() {
                                     <label className="block text-lg font-bold text-slate-500 mb-3">상단</label>
                                     <div className="flex items-center gap-3">
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, salinityTop: Math.max(0, +(prev.salinityTop - 0.5).toFixed(1)) }))}
+                                            onClick={() => setFormData(prev => ({ ...prev, salinityTop: Math.max(0, +(prev.salinityTop - 0.1).toFixed(1)) }))}
                                             className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
                                         >-</button>
                                         <input
@@ -194,7 +194,7 @@ function RecordContent() {
                                             className="flex-1 min-w-0 h-16 text-center text-4xl font-black text-blue-600 border-2 border-blue-200 rounded-2xl bg-blue-50 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all"
                                         />
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, salinityTop: +(prev.salinityTop + 0.5).toFixed(1) }))}
+                                            onClick={() => setFormData(prev => ({ ...prev, salinityTop: +(prev.salinityTop + 0.1).toFixed(1) }))}
                                             className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
                                         >+</button>
                                     </div>
@@ -204,7 +204,7 @@ function RecordContent() {
                                     <label className="block text-lg font-bold text-slate-500 mb-3">하단</label>
                                     <div className="flex items-center gap-3">
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, salinityBottom: Math.max(0, +(prev.salinityBottom - 0.5).toFixed(1)) }))}
+                                            onClick={() => setFormData(prev => ({ ...prev, salinityBottom: Math.max(0, +(prev.salinityBottom - 0.1).toFixed(1)) }))}
                                             className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
                                         >-</button>
                                         <input
@@ -215,7 +215,7 @@ function RecordContent() {
                                             className="flex-1 min-w-0 h-16 text-center text-4xl font-black text-blue-600 border-2 border-blue-200 rounded-2xl bg-blue-50 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all"
                                         />
                                         <button
-                                            onClick={() => setFormData(prev => ({ ...prev, salinityBottom: +(prev.salinityBottom + 0.5).toFixed(1) }))}
+                                            onClick={() => setFormData(prev => ({ ...prev, salinityBottom: +(prev.salinityBottom + 0.1).toFixed(1) }))}
                                             className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
                                         >+</button>
                                     </div>
@@ -233,17 +233,18 @@ function RecordContent() {
                             </h2>
                             <div className="flex items-center gap-3">
                                 <button
-                                    onClick={() => setFormData(prev => ({ ...prev, waterTemp: prev.waterTemp - 1 }))}
+                                    onClick={() => setFormData(prev => ({ ...prev, waterTemp: +(prev.waterTemp - 0.1).toFixed(1) }))}
                                     className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
                                 >-</button>
                                 <input
                                     type="number"
+                                    step="0.1"
                                     value={formData.waterTemp}
                                     onChange={(e) => setFormData(prev => ({ ...prev, waterTemp: Number(e.target.value) }))}
                                     className="flex-1 min-w-0 h-16 text-center text-4xl font-black text-orange-600 border-2 border-orange-200 rounded-2xl bg-orange-50 focus:border-orange-400 focus:ring-4 focus:ring-orange-100 transition-all"
                                 />
                                 <button
-                                    onClick={() => setFormData(prev => ({ ...prev, waterTemp: prev.waterTemp + 1 }))}
+                                    onClick={() => setFormData(prev => ({ ...prev, waterTemp: +(prev.waterTemp + 0.1).toFixed(1) }))}
                                     className="w-16 h-16 flex-shrink-0 rounded-2xl bg-slate-100 hover:bg-slate-200 text-3xl font-bold text-slate-600 transition-all active:scale-95"
                                 >+</button>
                             </div>

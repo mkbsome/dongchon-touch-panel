@@ -474,7 +474,7 @@ function FinishContent() {
                                 >+</button>
                             </div>
                             <div className="text-center text-slate-400">
-                                적정 범위: 2.0% ~ 3.0%
+                                적정 범위: 1.5% ~ 2.0%
                             </div>
                         </section>
 

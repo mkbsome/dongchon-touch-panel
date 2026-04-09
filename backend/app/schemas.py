@@ -78,7 +78,7 @@ class BatchResponse(BaseModel):
     firmness: float
     leaf_thickness: int
     cabbage_size: Optional[str] = None
-    total_quantity: float
+    total_quantity: Optional[float] = None
     room_temp: float
     outdoor_temp: Optional[float] = None
     season: str

@@ -55,6 +55,9 @@ export default function HistoryPage() {
     const [loading, setLoading] = useState(true);
     const [expandedBatch, setExpandedBatch] = useState<string | null>(null);
     const [measurements, setMeasurements] = useState<Record<string, Measurement[]>>({});
+    const [filterYear, setFilterYear] = useState<string>('');
+    const [filterMonth, setFilterMonth] = useState<string>('');
+    const [filterDay, setFilterDay] = useState<string>('');
 
     useEffect(() => {
         const fetchBatches = async () => {
@@ -134,6 +137,16 @@ export default function HistoryPage() {
         window.location.href = `/api/export?type=${type}`;
     };
 
+    const availableYears = Array.from(new Set(batches.map(b => new Date(b.startTime).getFullYear()))).sort((a, b) => b - a);
+
+    const filteredBatches = batches.filter(b => {
+        const d = new Date(b.startTime);
+        if (filterYear && d.getFullYear() !== Number(filterYear)) return false;
+        if (filterMonth && d.getMonth() + 1 !== Number(filterMonth)) return false;
+        if (filterDay && d.getDate() !== Number(filterDay)) return false;
+        return true;
+    });
+
     if (loading) {
         return <div className="h-screen flex items-center justify-center text-2xl">로딩중...</div>;
     }
@@ -148,7 +161,43 @@ export default function HistoryPage() {
                 >
                     <ArrowLeft className="w-8 h-8" />
                 </button>
-                <h1 className="text-3xl font-bold">완료된 공정 기록</h1>
+                <div className="flex flex-col items-center gap-2">
+                    <h1 className="text-3xl font-bold">완료된 공정 기록</h1>
+                    <div className="flex items-center gap-2">
+                        <select
+                            value={filterYear}
+                            onChange={e => { setFilterYear(e.target.value); setFilterMonth(''); setFilterDay(''); }}
+                            className="bg-indigo-700 text-white rounded-lg px-3 py-1 text-lg font-bold border border-indigo-400 focus:outline-none"
+                        >
+                            <option value="">전체 년도</option>
+                            {availableYears.map(y => (
+                                <option key={y} value={y}>{y}년</option>
+                            ))}
+                        </select>
+                        <select
+                            value={filterMonth}
+                            onChange={e => { setFilterMonth(e.target.value); setFilterDay(''); }}
+                            className="bg-indigo-700 text-white rounded-lg px-3 py-1 text-lg font-bold border border-indigo-400 focus:outline-none"
+                            disabled={!filterYear}
+                        >
+                            <option value="">전체 월</option>
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+                                <option key={m} value={m}>{m}월</option>
+                            ))}
+                        </select>
+                        <select
+                            value={filterDay}
+                            onChange={e => setFilterDay(e.target.value)}
+                            className="bg-indigo-700 text-white rounded-lg px-3 py-1 text-lg font-bold border border-indigo-400 focus:outline-none"
+                            disabled={!filterMonth}
+                        >
+                            <option value="">전체 일</option>
+                            {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                                <option key={d} value={d}>{d}일</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
                 <div className="flex gap-3">
                     <button
                         onClick={() => handleExport('batches')}
@@ -169,14 +218,14 @@ export default function HistoryPage() {
 
             {/* Main Content */}
             <main className="flex-1 p-5 overflow-y-auto">
-                {batches.length === 0 ? (
+                {filteredBatches.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-slate-500">
                         <Calendar className="w-20 h-20 mb-4" />
                         <p className="text-2xl">완료된 공정 기록이 없습니다.</p>
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {batches.map(batch => (
+                        {filteredBatches.map(batch => (
                             <div
                                 key={batch.id}
                                 className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden"
@@ -216,7 +265,7 @@ export default function HistoryPage() {
                                         <div className="flex items-center gap-4">
                                             <div className={clsx(
                                                 "px-4 py-2 rounded-xl font-bold text-lg",
-                                                batch.finalCabbageSalinity && batch.finalCabbageSalinity >= 2 && batch.finalCabbageSalinity <= 3
+                                                batch.finalCabbageSalinity && batch.finalCabbageSalinity >= 1.5 && batch.finalCabbageSalinity <= 2
                                                     ? "bg-green-100 text-green-700"
                                                     : "bg-amber-100 text-amber-700"
                                             )}>

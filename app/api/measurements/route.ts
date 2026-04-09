@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 
 const API_BASE = process.env.BACKEND_URL || 'http://localhost:8001';
 
+export const dynamic = 'force-dynamic';
+
 // GET: 특정 배치의 측정 기록 조회
 export async function GET(request: Request) {
     try {
